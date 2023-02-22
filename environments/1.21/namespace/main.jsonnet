@@ -6,4 +6,4 @@
  }
 }
 
-+ (import "1.21/mlibrary/namespace/main.libsonnet")
++ (import "1.21/mlibrary/namespace.libsonnet")
