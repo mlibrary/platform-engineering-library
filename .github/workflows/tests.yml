@@ -15,12 +15,13 @@ jobs:
     - uses: azure/setup-kubectl@v3
       with:
         version: v1.21.0
-    - name: install tanka and jb
+    - name: install tanka and jb and dyff
       run: |
         sudo curl -Lo /usr/local/bin/tk https://github.com/grafana/tanka/releases/latest/download/tk-linux-amd64
         sudo chmod a+x /usr/local/bin/tk
         sudo curl -Lo /usr/local/bin/jb https://github.com/jsonnet-bundler/jsonnet-bundler/releases/latest/download/jb-linux-amd64
         sudo chmod a+x /usr/local/bin/jb
+        curl --silent --location https://git.io/JYfAY | bash
     - name: jb install
       run: jb install
     - name: Run tests
