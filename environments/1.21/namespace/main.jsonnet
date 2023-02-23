@@ -1,9 +1,9 @@
+(import "1.21/mlibrary/namespace.libsonnet") +
 {
-  _config:: {
+  _config+:: {
     namespace: {
       name: "my_namespace"
    }
  }
 }
 
-+ (import "1.21/mlibrary/namespace.libsonnet")

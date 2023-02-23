@@ -9,6 +9,7 @@ end
 
 group :test do
   gem "rspec"
+  gem "hashdiff"
   gem "simplecov"
   gem "simplecov-lcov"
 end

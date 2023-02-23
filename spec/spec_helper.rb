@@ -13,10 +13,12 @@
 # it.
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+require "hashdiff"
 require "jsonnet"
 require "json"
 require "yaml"
 require "byebug"
+require_relative "./support/hash_diff"
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
