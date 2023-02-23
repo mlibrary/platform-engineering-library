@@ -7,22 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
+    - name: Set up Ruby 3.2
+      uses: ruby/setup-ruby@v1
       with:
-        node-version: 18.x
-    - run: npm install
-    - uses: azure/setup-kubectl@v3
-      with:
-        version: v1.21.0
-    - name: install tanka and jb and dyff
-      run: |
-        sudo curl -Lo /usr/local/bin/tk https://github.com/grafana/tanka/releases/latest/download/tk-linux-amd64
-        sudo chmod a+x /usr/local/bin/tk
-        sudo curl -Lo /usr/local/bin/jb https://github.com/jsonnet-bundler/jsonnet-bundler/releases/latest/download/jb-linux-amd64
-        sudo chmod a+x /usr/local/bin/jb
-        curl --silent --location https://git.io/JYfAY | bash
-    - name: jb install
-      run: jb install
+        ruby-version: '3.2'
+        bundler-cache: true
     - name: Run tests
-      run: npx bats -t test
+      run: bundle exec rspec
