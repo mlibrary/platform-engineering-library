@@ -1,0 +1,34 @@
+solrcloud:
+  apiVersion: solr.apache.org/v1beta1
+  kind: SolrCloud
+  metadata:
+    name: test-solr-cloud
+  spec:
+    customSolrKubeOptions:
+      podOptions:
+        livenessProbe:
+          timeoutSeconds: 30
+    solrAddressability:
+      podPort: 8983
+    solrSecurity:
+      authenticationType: Basic
+    updateStrategy:
+      method: Managed
+    zookeeperRef:
+      provided:
+        chroot: /
+        persistence:
+          spec:
+            accessModes:
+            - ReadWriteOnce
+            resources:
+              requests:
+                storage: 200Mi
+            storageClassName: rook-ceph-block
+        replicas: 3
+        zookeeperPodPolicy:
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 300m
