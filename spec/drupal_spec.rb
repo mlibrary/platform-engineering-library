@@ -22,6 +22,7 @@ RSpec.describe "drupal" do
     @output["drupal"]["web"]["service"]["metadata"]["namespace"] = "my_namespace"
     @output["drupal"]["web"]["deployment"]["metadata"]["namespace"] = "my_namespace"
     @output["drupal"]["web"]["ingress"]["metadata"]["namespace"] = "my_namespace"
+    @output["drupal"]["db"]["service"]["metadata"]["namespace"] = "my_namespace"
     @config["namespace"] = "my_namespace"
     expect(subject).to eq(@output)
   end

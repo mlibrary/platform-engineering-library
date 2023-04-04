@@ -105,3 +105,19 @@ drupal:
         - hosts:
           - cms.my-cluster.lib.umich.edu
           secretName: web-tls
+  db:
+    service:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          name: db
+        name: db
+        namespace: default
+      spec:
+        ports:
+        - name: mysql
+          port: 3306
+          targetPort: 3306
+        selector:
+          app: db

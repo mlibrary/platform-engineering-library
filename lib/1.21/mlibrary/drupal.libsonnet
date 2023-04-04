@@ -160,5 +160,30 @@
         },
       },
     },
+    db: {
+      service: {
+        apiVersion: 'v1',
+        kind: 'Service',
+        metadata: {
+          name: 'db',
+          namespace: $._config.drupal.namespace,
+          labels: {
+            name: 'db',
+          },
+        },
+        spec: {
+          ports: [
+            {
+              name: 'mysql',
+              port: 3306,
+              targetPort: 3306,
+            },
+          ],
+          selector: {
+            app: 'db',
+          },
+        },
+      },
+    },
   },
 }
