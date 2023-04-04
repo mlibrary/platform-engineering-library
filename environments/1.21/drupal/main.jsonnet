@@ -1,10 +1,17 @@
-(import "1.21/mlibrary/drupal.libsonnet") +
+(import '1.21/mlibrary/drupal.libsonnet') +
 {
   _config+:: {
     drupal+: {
-      //namespace: "my_namespace",
-      //files_storage: "1G"
-   }
- }
+      namespace: 'cms',
+      files_storage: '2G',
+      image: 'ghcr.io/mlibrary/my-drupal-image:1.0',
+      host: 'cms.my-site.lib.umich.edu',
+      env: [
+        { name: 'NAME', value: 'value' },
+      ],
+      secrets: [
+        { name: 'name', key: 'KEY' },
+      ],
+    },
+  },
 }
-
