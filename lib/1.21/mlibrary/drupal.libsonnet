@@ -2,13 +2,22 @@
   _config+:: {
     drupal+: {
       namespace+: 'default',
-      files_storage+: '2G',
-      db_user: 'drupal',
-      db_database: 'drupal',
-      db_host: 'db',
+      web+: {
+        files_storage+: '2G',
+        env+: [],
+        secrets+: [],
+        //image:  ghcr.io/mlibrary/your-image:1.0 //required
+        //host: cms.my-cluster.lib.umich.edu //required
+      },
       argo_project: 'default',
-      env: [],
-      secrets: [],
+      db+: {
+        user+: 'drupal',
+        database+: 'drupal',
+        host+: 'db',
+        image+: 'mariadb:10.6',
+        storage+: '1G',
+        memory+: '500M',
+      },
     },
   },
 }
@@ -27,7 +36,7 @@
           accessModes: ['ReadWriteOnce'],
           resources: {
             requests: {
-              storage: $._config.drupal.files_storage,
+              storage: $._config.drupal.web.files_storage,
             },
           },
           volumeMode: 'Filesystem',
@@ -83,11 +92,11 @@
                            key: 'MARIADB_PASSWORD',
                            name: 'db',
                          } } },
-                         { name: 'MARIADB_USER', value: $._config.drupal.db_user },
+                         { name: 'MARIADB_USER', value: $._config.drupal.db.user },
                          { name: 'MARIADB_DATABASE', value:
-                           $._config.drupal.db_database },
-                         { name: 'DATABASE_HOST', value: $._config.drupal.db_host },
-                       ] + $._config.drupal.env
+                           $._config.drupal.db.database },
+                         { name: 'DATABASE_HOST', value: $._config.drupal.db.host },
+                       ] + $._config.drupal.web.env
                        + std.map(
                          (function(x)
                             {
@@ -98,9 +107,9 @@
                                   name: x.name,
                                 },
                               },
-                            }), $._config.drupal.secrets
+                            }), $._config.drupal.web.secrets
                        ),
-                  image: $._config.drupal.image,
+                  image: $._config.drupal.web.image,
                   imagePullPolicy: 'IfNotPresent',
                   name: 'web',
                   ports: [
@@ -139,7 +148,7 @@
           rules:
             [
               {
-                host: $._config.drupal.host,
+                host: $._config.drupal.web.host,
                 http: {
                   paths: [
                     {
@@ -153,7 +162,7 @@
             ],
           tls: [
             {
-              hosts: [$._config.drupal.host],
+              hosts: [$._config.drupal.web.host],
               secretName: 'web-tls',
             },
           ],
@@ -161,6 +170,23 @@
       },
     },
     db: {
+      storage: {
+        apiVersion: 'v1',
+        kind: 'PersistentVolumeClaim',
+        metadata: {
+          name: 'db',
+          namespace: $._config.drupal.namespace,
+        },
+        spec: {
+          accessModes: ['ReadWriteOnce'],
+          resources: {
+            requests: {
+              storage: $._config.drupal.db.storage,
+            },
+          },
+          volumeMode: 'Filesystem',
+        },
+      },
       service: {
         apiVersion: 'v1',
         kind: 'Service',
@@ -181,6 +207,63 @@
           ],
           selector: {
             app: 'db',
+          },
+        },
+      },
+      deployment: {
+        apiVersion: 'apps/v1',
+        kind: 'Deployment',
+        metadata: {
+          name: 'db',
+          namespace: $._config.drupal.namespace,
+        },
+        spec: {
+          minReadySeconds: 10,
+          replicas: 1,
+          revisionHistoryLimit: 10,
+          selector: { matchLabels: { app: 'db' } },
+          strategy: { type: 'Recreate' },
+          template: {
+            metadata: { labels: { app: 'db' } },
+            spec: {
+              containers: [
+                {
+                  env: [
+                    { name: 'MARIADB_USER', value: $._config.drupal.db.user },
+                    { name: 'MARIADB_DATABASE', value: $._config.drupal.db.database },
+                    { name: 'MARIADB_ROOT_PASSWORD', valueFrom: { secretKeyRef: {
+                      key: 'MARIADB_ROOT_PASSWORD',
+                      name: 'db-root',
+                    } } },
+                    { name: 'MARIADB_PASSWORD', valueFrom: { secretKeyRef: {
+                      key: 'MARIADB_PASSWORD',
+                      name: 'db',
+                    } } },
+                  ],
+                  image: $._config.drupal.db.image,
+                  imagePullPolicy: 'IfNotPresent',
+                  name: 'mysql',
+                  ports: [
+                    { containerPort: 3306, name: 'mysql' },
+                  ],
+                  resources: {
+                    requests: { memory: $._config.drupal.db.memory },
+                  },
+                  volumeMounts: [
+                    {
+                      mountPath: '/var/lib/mysql',
+                      name: 'mariadb',
+                    },
+                  ],
+                },
+              ],
+              volumes: [
+                {
+                  name: 'mariadb',
+                  persistentVolumeClaim: { claimName: 'db' },
+                },
+              ],
+            },
           },
         },
       },

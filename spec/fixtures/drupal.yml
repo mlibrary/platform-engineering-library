@@ -106,6 +106,19 @@ drupal:
           - cms.my-cluster.lib.umich.edu
           secretName: web-tls
   db:
+    storage:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: db
+        namespace: default
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1G
+        volumeMode: Filesystem
     service:
       apiVersion: v1
       kind: Service
@@ -121,3 +134,55 @@ drupal:
           targetPort: 3306
         selector:
           app: db
+    deployment:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: db
+        namespace: default
+      spec:
+        minReadySeconds: 10
+        replicas: 1
+        revisionHistoryLimit: 10
+        selector:
+          matchLabels:
+            app: db
+        strategy:
+          type: Recreate
+        template:
+          metadata:
+            labels:
+              app: db
+          spec:
+            containers:
+            - env:
+              - name: MARIADB_USER
+                value: drupal
+              - name: MARIADB_DATABASE
+                value: drupal
+              - name: MARIADB_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: MARIADB_ROOT_PASSWORD
+                    name: db-root
+              - name: MARIADB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: MARIADB_PASSWORD
+                    name: db
+              image: mariadb:10.6
+              imagePullPolicy: IfNotPresent
+              name: mysql
+              ports:
+              - containerPort: 3306
+                name: mysql
+              resources:
+                requests:
+                  memory: 500M
+              volumeMounts:
+              - mountPath: /var/lib/mysql
+                name: mariadb
+            volumes:
+            - name: mariadb
+              persistentVolumeClaim:
+                claimName: db
