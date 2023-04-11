@@ -13,3 +13,176 @@ drupal:
           requests:
             storage: 2G
         volumeMode: Filesystem
+    service:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          name: web
+        name: web
+        namespace: default
+      spec:
+        ports:
+        - name: web
+          port: 80
+          targetPort: 80
+        selector:
+          app: web
+    deployment:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: web
+        namespace: default
+      spec:
+        minReadySeconds: 10
+        replicas: 2
+        revisionHistoryLimit: 10
+        selector:
+          matchLabels:
+            app: web
+        strategy:
+          type: Recreate
+        template:
+          metadata:
+            labels:
+              app: web
+          spec:
+            containers:
+            - env:
+              - name: HASH_SALT
+                valueFrom:
+                  secretKeyRef:
+                    key: HASH_SALT
+                    name: drupal-hash-salt
+              - name: MARIADB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: MARIADB_PASSWORD
+                    name: db
+              - name: MARIADB_USER
+                value: drupal
+              - name: MARIADB_DATABASE
+                value: drupal
+              - name: DATABASE_HOST
+                value: db
+              image: ghcr.io/mlibrary/my-drupal-image:1.0
+              imagePullPolicy: IfNotPresent
+              name: web
+              ports:
+              - containerPort: 80
+                name: web
+              volumeMounts:
+              - mountPath: /var/www/html/sites/default/files
+                name: drupal-files
+            imagePullSecrets:
+            - name: github-packages-read
+            volumes:
+            - name: drupal-files
+              persistentVolumeClaim:
+                claimName: web
+    ingress:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        labels:
+          argocd.argoproj.io/instance: default
+        name: web
+        namespace: default
+      spec:
+        rules:
+        - host: cms.my-cluster.lib.umich.edu
+          http:
+            paths:
+            - backend:
+                service:
+                  name: web
+                  port:
+                    number: 80
+              path: /
+              pathType: ImplementationSpecific
+        tls:
+        - hosts:
+          - cms.my-cluster.lib.umich.edu
+          secretName: web-tls
+  db:
+    storage:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: db
+        namespace: default
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1G
+        volumeMode: Filesystem
+    service:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          name: db
+        name: db
+        namespace: default
+      spec:
+        ports:
+        - name: mysql
+          port: 3306
+          targetPort: 3306
+        selector:
+          app: db
+    deployment:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: db
+        namespace: default
+      spec:
+        minReadySeconds: 10
+        replicas: 1
+        revisionHistoryLimit: 10
+        selector:
+          matchLabels:
+            app: db
+        strategy:
+          type: Recreate
+        template:
+          metadata:
+            labels:
+              app: db
+          spec:
+            containers:
+            - env:
+              - name: MARIADB_USER
+                value: drupal
+              - name: MARIADB_DATABASE
+                value: drupal
+              - name: MARIADB_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: MARIADB_ROOT_PASSWORD
+                    name: db-root
+              - name: MARIADB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: MARIADB_PASSWORD
+                    name: db
+              image: mariadb:10.6
+              imagePullPolicy: IfNotPresent
+              name: mysql
+              ports:
+              - containerPort: 3306
+                name: mysql
+              resources:
+                requests:
+                  memory: 500M
+              volumeMounts:
+              - mountPath: /var/lib/mysql
+                name: mariadb
+            volumes:
+            - name: mariadb
+              persistentVolumeClaim:
+                claimName: db
