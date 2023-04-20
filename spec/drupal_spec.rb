@@ -56,5 +56,10 @@ RSpec.describe "drupal" do
     )
     expect(subject).to eq(@output)
   end
+  it "can change out the certificate manager" do
+    @config["web"]["certificate_manager"] = "letsencrypt-staging" 
+    @output["drupal"]["web"]["ingress"]["metadata"]["annotations"]["cert-manager.io/cluster-issuer"] = "letsencrypt-staging"
+    expect(subject).to eq(@output)
+  end
 
 end

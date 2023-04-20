@@ -89,6 +89,8 @@ drupal:
           argocd.argoproj.io/instance: default
         name: web
         namespace: default
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt
       spec:
         rules:
         - host: cms.my-cluster.lib.umich.edu
