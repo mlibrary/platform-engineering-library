@@ -6,6 +6,7 @@
         files_storage+: '2G',
         env+: [],
         secrets+: [],
+        certificate_manager+: 'letsencrypt',
         //image:  ghcr.io/mlibrary/your-image:1.0 //required
         //host: cms.my-cluster.lib.umich.edu //required
       },
@@ -140,6 +141,10 @@
         metadata: {
           labels: {
             'argocd.argoproj.io/instance': $._config.drupal.argo_project,
+          },
+          annotations: {
+            'cert-manager.io/cluster-issuer':
+              $._config.drupal.web.certificate_manager,
           },
           name: 'web',
           namespace: $._config.drupal.namespace,
