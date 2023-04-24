@@ -6,6 +6,8 @@ drupal:
       metadata:
         name: web
         namespace: default
+        labels:
+          argocd.argoproj.io/instance: default
       spec:
         accessModes:
         - ReadWriteOnce
@@ -19,6 +21,7 @@ drupal:
       metadata:
         labels:
           name: web
+          argocd.argoproj.io/instance: default
         name: web
         namespace: default
       spec:
@@ -34,6 +37,8 @@ drupal:
       metadata:
         name: web
         namespace: default
+        labels:
+          argocd.argoproj.io/instance: default
       spec:
         minReadySeconds: 10
         replicas: 1
@@ -114,6 +119,8 @@ drupal:
       metadata:
         name: db
         namespace: default
+        labels:
+          argocd.argoproj.io/instance: default
       spec:
         accessModes:
         - ReadWriteOnce
@@ -127,6 +134,7 @@ drupal:
       metadata:
         labels:
           name: db
+          argocd.argoproj.io/instance: default
         name: db
         namespace: default
       spec:
@@ -142,6 +150,8 @@ drupal:
       metadata:
         name: db
         namespace: default
+        labels:
+          argocd.argoproj.io/instance: default
       spec:
         minReadySeconds: 10
         replicas: 1

@@ -32,6 +32,9 @@
         metadata: {
           name: 'web',
           namespace: $._config.drupal.namespace,
+          labels: {
+            'argocd.argoproj.io/instance': $._config.drupal.argo_project,
+          },
         },
         spec: {
           accessModes: ['ReadWriteOnce'],
@@ -51,6 +54,7 @@
           namespace: $._config.drupal.namespace,
           labels: {
             name: 'web',
+            'argocd.argoproj.io/instance': $._config.drupal.argo_project,
           },
         },
         spec: {
@@ -72,6 +76,9 @@
         metadata: {
           name: 'web',
           namespace: $._config.drupal.namespace,
+          labels: {
+            'argocd.argoproj.io/instance': $._config.drupal.argo_project,
+          },
         },
         spec: {
           minReadySeconds: 10,
@@ -181,6 +188,9 @@
         metadata: {
           name: 'db',
           namespace: $._config.drupal.namespace,
+          labels: {
+            'argocd.argoproj.io/instance': $._config.drupal.argo_project,
+          },
         },
         spec: {
           accessModes: ['ReadWriteOnce'],
@@ -200,6 +210,7 @@
           namespace: $._config.drupal.namespace,
           labels: {
             name: 'db',
+            'argocd.argoproj.io/instance': $._config.drupal.argo_project,
           },
         },
         spec: {
@@ -221,6 +232,9 @@
         metadata: {
           name: 'db',
           namespace: $._config.drupal.namespace,
+          labels: {
+            'argocd.argoproj.io/instance': $._config.drupal.argo_project,
+          },
         },
         spec: {
           minReadySeconds: 10,
