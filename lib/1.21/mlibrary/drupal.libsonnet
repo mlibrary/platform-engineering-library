@@ -1,23 +1,23 @@
 {
   _config+:: {
     drupal+: {
-      namespace+: 'default',
+      namespace: 'default',
       web+: {
-        files_storage+: '2G',
+        files_storage: '2G',
         env+: [],
         secrets+: [],
-        certificate_manager+: 'letsencrypt',
+        certificate_manager: 'letsencrypt',
         //image:  ghcr.io/mlibrary/your-image:1.0 //required
         //host: cms.my-cluster.lib.umich.edu //required
       },
       argo_project: 'default',
       db+: {
-        user+: 'drupal',
-        database+: 'drupal',
-        host+: 'db',
-        image+: 'mariadb:10.6',
-        storage+: '1G',
-        memory+: '500M',
+        user: 'drupal',
+        database: 'drupal',
+        host: 'db',
+        image: 'mariadb:10.6',
+        storage: '1G',
+        memory: '500M',
       },
     },
   },
